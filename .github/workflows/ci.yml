@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: ['master']
+  pull_request:
+    branches: ['master']
+    types: [opened, synchronize, ready_for_review]
+
+jobs:
+  ci:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: install dependencies
+        uses: borales/actions-yarn@v4.2.0
+        with:
+          cmd: install
+
+      - name: type check
+        uses: borales/actions-yarn@v4.2.0
+        with:
+          cmd: type-check
+          dir: apps/mobile
+
+      - name: format
+        uses: borales/actions-yarn@v4.2.0
+        with:
+          cmd: format
+
+      - name: lint
+        uses: borales/actions-yarn@v4.2.0
+        with:
+          cmd: lint
+
+      - name: test
+        uses: borales/actions-yarn@v4.2.0
+        with:
+          cmd: test
+          dir: apps/mobile
